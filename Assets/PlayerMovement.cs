@@ -11,6 +11,12 @@ public class PlayerMovement : MonoBehaviour
     private bool alive = true;
     private LogicController game;
 
+    //variables for growing
+    public float growTimer = 0;
+    public float growTime = 6f;
+    public float maxSize = 2f;
+    public bool isMaxSize = false;
+
     [SerializeField] private Rigidbody2D playerRigid;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
@@ -18,6 +24,10 @@ public class PlayerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if(isMaxSize== false)
+        { 
+            StartCoroutine(Grow());
+        }
         game = GameObject.FindGameObjectWithTag("GameController").GetComponent<LogicController>();
     }
 
@@ -58,5 +68,21 @@ public class PlayerMovement : MonoBehaviour
             Destroy(gameObject.GetComponent<BoxCollider2D>());
             game.GameOver();
         }
+    }
+
+    private IEnumerator Grow()
+    {
+        Vector2 startScale = transform.localScale;
+        Vector2 maxScale = new Vector2(maxSize, maxSize);
+
+        do
+        {
+            transform.localScale = Vector3.Lerp(startScale, maxScale, growTimer / growTime);
+            growTimer += Time.deltaTime;
+            yield return null;  //i think this ends function
+        }
+        while (growTimer<growTime);
+
+        isMaxSize = true;
     }
 }
