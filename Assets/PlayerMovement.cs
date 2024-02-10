@@ -13,8 +13,9 @@ public class PlayerMovement : MonoBehaviour
 
     //variables for growing
     public float growTimer = 0;
-    public float growTime = 6f;
-    public float maxSize = 2f;
+    public float growTime = 1f; //speed of growth
+    public float maxSize = 2f; //maximum size after growth
+    public float minSize = 1f; //maximum size after growth
     public bool isMaxSize = false;
 
     [SerializeField] private Rigidbody2D playerRigid;
@@ -24,10 +25,7 @@ public class PlayerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        if(isMaxSize== false)
-        { 
-            StartCoroutine(Grow());
-        }
+
         game = GameObject.FindGameObjectWithTag("GameController").GetComponent<LogicController>();
     }
 
@@ -70,7 +68,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private IEnumerator Grow()
+    public IEnumerator Grow()
     {
         Vector2 startScale = transform.localScale;
         Vector2 maxScale = new Vector2(maxSize, maxSize);
@@ -85,4 +83,21 @@ public class PlayerMovement : MonoBehaviour
 
         isMaxSize = true;
     }
+
+    public IEnumerator Shrink()
+    {
+        Vector2 startScale = transform.localScale;
+        Vector2 minScale = new Vector2(minSize, minSize);
+
+        do
+        {
+            transform.localScale = Vector3.Lerp(startScale, minScale, growTimer / growTime);
+            growTimer += Time.deltaTime;
+            yield return null;  //i think this ends function
+        }
+        while (growTimer < growTime);
+
+        isMaxSize = true;
+    }
 }
+
