@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
 public class LogicController : MonoBehaviour
 {
@@ -10,7 +11,20 @@ public class LogicController : MonoBehaviour
     public TextMeshProUGUI scoreText;
     public GameObject GameOverScreen;
 
-public void AddScore()
+    /*
+    void Start()
+    {
+
+
+    }
+
+    void Update()
+    {
+
+    }
+    */
+
+    public void AddScore()
     { 
         score++;
         scoreText.text = score.ToString();
