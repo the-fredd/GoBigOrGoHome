@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -15,10 +17,12 @@ public class PlayerMovement : MonoBehaviour
     public float growTimer = 0;
     public float growTime = 1f; //speed of growth
     public float maxSize = 2f; //maximum size after growth
-    public float minSize = 1f; //maximum size after growth
+    public float minSize = 0.5f; //maximum size after growth
+    public float medSize = 1f;
     public float sizePenalty = 0.75f;
     public bool isMaxSize = false;
-    public bool isMinSize = true;
+    public bool isMinSize = false;
+    public bool isMedSize = true;
     private float moveSpeedForSize;
     private float jumpPowerForSize;
 
@@ -52,12 +56,12 @@ public class PlayerMovement : MonoBehaviour
                 playerRigid.velocity = new Vector2(playerRigid.velocity.x, playerRigid.velocity.y * 0.5f);
             }
 
-            if (Input.GetButtonUp("Fire1") && isMinSize)
+            if (Input.GetButtonUp("Fire1") && (isMinSize || isMedSize))
             {
                 StartCoroutine(Grow());
             }
 
-            if (Input.GetButtonUp("Fire2") && isMaxSize)
+            if (Input.GetButtonUp("Fire2") && (isMaxSize || isMedSize))
             {
                 StartCoroutine(Shrink());
             }
@@ -65,7 +69,7 @@ public class PlayerMovement : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        moveSpeedForSize = moveSpeed /(sizePenalty*Mathf.Max(transform.localScale.x, transform.localScale.y));
+        moveSpeedForSize = moveSpeed /(1.5f*sizePenalty*Mathf.Max(transform.localScale.x, transform.localScale.y));
         playerRigid.velocity = new Vector2(horizontal * moveSpeedForSize, playerRigid.velocity.y);
 
     }
@@ -93,11 +97,19 @@ public class PlayerMovement : MonoBehaviour
     public IEnumerator Grow()
     {
         Vector2 startScale = transform.localScale;
+
+        float size = 2;
         Vector2 maxScale = new Vector2(maxSize, maxSize);
+        if (isMinSize)
+        {
+            maxScale = new Vector2(medSize, medSize);
+            size = 1;
+        }
 
         do
         {
-            isMinSize = false;
+            if (isMedSize) { isMedSize = false; }
+            if (isMinSize) { isMinSize = false; }
             transform.localScale = Vector3.Lerp(startScale, maxScale, growTimer / growTime);
             growTimer += Time.deltaTime;
             yield return null;  //i think this ends function
@@ -105,23 +117,33 @@ public class PlayerMovement : MonoBehaviour
         while (growTimer<growTime);
         growTimer = 0;
         isMaxSize = true;
+        if (size == 1) { isMedSize = true; }
+        if (size == 2) { isMaxSize = true; }
     }
 
     public IEnumerator Shrink()
     {
         Vector2 startScale = transform.localScale;
-        Vector2 minScale = new Vector2(minSize, minSize);
 
+        float size = 2;
+        Vector2 minScale = new Vector2(minSize, minSize);
+        if (isMaxSize){
+            minScale = new Vector2(medSize, medSize);
+            size = 3;
+        }
+        
         do
         {
-            isMaxSize = false;
+            if (isMaxSize) { isMaxSize = false; }
+            if (isMedSize) { isMedSize = false; }
             transform.localScale = Vector3.Lerp(startScale, minScale, growTimer / growTime);
             growTimer += Time.deltaTime;
             yield return null;  //i think this ends function
         }
         while (growTimer < growTime);
         growTimer = 0;
-        isMinSize = true;
+        if (size == 2) { isMinSize = true; }
+        if (size == 3) { isMedSize = true; }
     }
 
 
