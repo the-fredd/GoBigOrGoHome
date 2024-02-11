@@ -6,7 +6,7 @@ using UnityEngine;
 public class Coin_Spawner : MonoBehaviour
 {
     [SerializeField] private GameObject coin;
-    [SerializeField] private float spawnRate = 3;
+    [SerializeField] private float spawnRate = 20;
     [SerializeField] private float spawnDelay = 0;
     private float timer;
 
@@ -23,7 +23,7 @@ public class Coin_Spawner : MonoBehaviour
         { timer += Time.deltaTime; }
         else { 
             timer = 0;
-            Instantiate(coin, new Vector3(Random.Range(-7, 7), transform.position.y, transform.position.z), transform.rotation);
+            Instantiate(coin, transform.position, transform.rotation);
         }
     }
 }

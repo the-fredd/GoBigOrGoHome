@@ -17,6 +17,6 @@ public class CameraScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        camera2.m_Lens.OrthographicSize = 4 + (0.25f * Mathf.Max(plmov.transform.localScale.x, plmov.transform.localScale.y));
+        camera2.m_Lens.OrthographicSize = 4 + (0.5f * Mathf.Max(plmov.transform.localScale.x, plmov.transform.localScale.y));
     }
 }

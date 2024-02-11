@@ -22,7 +22,7 @@ public class LogicController : MonoBehaviour
     {
 
     }
-    */
+    
 
     public void AddScore()
     { 
@@ -39,4 +39,5 @@ public class LogicController : MonoBehaviour
     { 
         GameOverScreen.SetActive(true); 
     }
+    */
 }

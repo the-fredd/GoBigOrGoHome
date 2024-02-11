@@ -30,6 +30,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private Transform topCheck;
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask bulletLayer;
 
     // Start is called before the first frame update
     void Start()
@@ -47,13 +48,15 @@ public class PlayerMovement : MonoBehaviour
 
             if (Input.GetButtonDown("Jump") && IsGrounded())
             {
-                jumpPowerForSize = jumpPower * (sizePenalty*(0.6f+0.4f*Mathf.Max(transform.localScale.x, transform.localScale.y)));
+                jumpPowerForSize = jumpPower * (0.6f+(sizePenalty*0.4f *Mathf.Max(transform.localScale.x, transform.localScale.y)));
                 playerRigid.velocity = new Vector2(playerRigid.velocity.x, jumpPowerForSize);
+                StartCoroutine(Shrink());
             }
 
             if (Input.GetButtonUp("Jump") && playerRigid.velocity.y > 0f)
             {
                 playerRigid.velocity = new Vector2(playerRigid.velocity.x, playerRigid.velocity.y * 0.5f);
+                
             }
 
             if (Input.GetButtonUp("Fire1") && (isMinSize || isMedSize))
@@ -65,6 +68,8 @@ public class PlayerMovement : MonoBehaviour
             {
                 StartCoroutine(Shrink());
             }
+
+            //if (transform.position.y < -10f) game.GameOver(); //TODO reactivate
         }
     }
     private void FixedUpdate()
@@ -80,45 +85,57 @@ public class PlayerMovement : MonoBehaviour
 
     private bool IsSquashed()
     {
-        return Physics2D.OverlapCircle(topCheck.position, 0.2f, groundLayer);
+        return Physics2D.OverlapBox(topCheck.position, new Vector2(0.1f, 0.1f), 0, bulletLayer);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if(collision.gameObject.layer == 7 || (collision.gameObject.layer == 6 && IsGrounded() && (IsSquashed())))
+        if ((collision.gameObject.layer == 7 && (isMinSize || isMedSize)) || (collision.gameObject.layer == 6 && IsGrounded() && (IsSquashed())))
         {
             alive = false;
-            playerRigid.velocity = new Vector2(0, -5);
+            Destroy(gameObject);
             Destroy(gameObject.GetComponent<BoxCollider2D>());
-            game.GameOver();
+            //game.GameOver();  //TODO Reactivate
         }
+
+        if (collision.gameObject.layer == 7 && isMedSize)
+        {
+            StartCoroutine(Grow());
+        }
+        /*
+        if (collision.gameObject.layer == 8 && (isMedSize || isMinSize))
+        {
+            StartCoroutine(Grow());
+        }*/
     }
 
     public IEnumerator Grow()
     {
-        Vector2 startScale = transform.localScale;
+        if (isMedSize||isMinSize) {
+            Vector2 startScale = transform.localScale;
 
-        float size = 2;
-        Vector2 maxScale = new Vector2(maxSize, maxSize);
-        if (isMinSize)
-        {
-            maxScale = new Vector2(medSize, medSize);
-            size = 1;
-        }
+            float size = 2;
+            Vector2 maxScale = new Vector2(maxSize, maxSize);
+            if (isMinSize)
+            {
+                maxScale = new Vector2(medSize, medSize);
+                size = 1;
+            }
 
-        do
-        {
-            if (isMedSize) { isMedSize = false; }
-            if (isMinSize) { isMinSize = false; }
-            transform.localScale = Vector3.Lerp(startScale, maxScale, growTimer / growTime);
-            growTimer += Time.deltaTime;
-            yield return null;  //i think this ends function
+            do
+            {
+                if (isMedSize) { isMedSize = false; }
+                if (isMinSize) { isMinSize = false; }
+                transform.localScale = Vector3.Lerp(startScale, maxScale, growTimer / growTime);
+                growTimer += Time.deltaTime;
+                yield return null;
+            }
+            while (growTimer < growTime);
+            growTimer = 0;
+            isMaxSize = true;
+            if (size == 1) { isMedSize = true; }
+            if (size == 2) { isMaxSize = true; }
         }
-        while (growTimer<growTime);
-        growTimer = 0;
-        isMaxSize = true;
-        if (size == 1) { isMedSize = true; }
-        if (size == 2) { isMaxSize = true; }
     }
 
     public IEnumerator Shrink()

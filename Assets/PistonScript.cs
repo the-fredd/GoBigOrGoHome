@@ -7,12 +7,12 @@ using UnityEngine.Pool;
 
 public class PistonScript : MonoBehaviour
 {
-
+    [SerializeField] float Offset = 0f; //value between 0 and 0.8
     public float moveSpeed = 1;
     public float pistonTimer = 0;
-    public float pistonTime = 0.1f; //speed of growth
+    public float pistonTime = 0.1f;
     public float waitTimer = 0;
-    public float waitTime = 2f; //speed of growth
+    public float waitTime = 2f;
     public bool isUpwards, isDownwards;
     public Vector2 topPosition;
     public Vector2 bottomPosition;
@@ -37,6 +37,7 @@ public class PistonScript : MonoBehaviour
     {
         pointCount = wayPoints.Length;
         pointIndex = 1;
+        transform.position = new Vector2(transform.position.x, transform.position.y - Offset);
 
         bottomPosition = transform.position;
         targetPos = wayPoints[pointIndex].transform.position;
